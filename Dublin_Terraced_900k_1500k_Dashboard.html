@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dublin City Terraced Houses Sold — €900k–€1.5m</title>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<style>
+  .viz-root {
+    color-scheme: light;
+    --surface-1:      #fcfcfb;
+    --page-plane:     #f9f9f7;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --gridline:       #e1e0d9;
+    --baseline:       #c3c2b7;
+    --border:         rgba(11,11,11,0.10);
+    --series-1:       #2a78d6; /* blue - sequential / primary */
+    --series-2:       #eb6834; /* orange - trend / secondary */
+    --diverge-pos:    #2a78d6; /* above asking */
+    --diverge-neg:    #e34948; /* below asking */
+    --diverge-mid:    #f0efec;
+  }
+  @media (prefers-color-scheme: dark) {
+    .viz-root {
+      color-scheme: dark;
+      --surface-1:      #1a1a19;
+      --page-plane:     #0d0d0d;
+      --text-primary:   #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted:     #898781;
+      --gridline:       #2c2c2a;
+      --baseline:       #383835;
+      --border:         rgba(255,255,255,0.10);
+      --series-1:       #3987e5;
+      --series-2:       #d95926;
+      --diverge-pos:    #3987e5;
+      --diverge-neg:    #e66767;
+      --diverge-mid:    #383835;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--page-plane);
+    color: var(--text-primary);
+  }
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 24px 20px 60px; }
+  h1 { font-size: 22px; font-weight: 700; margin: 0 0 4px; }
+  .subtitle { color: var(--text-secondary); font-size: 14px; margin: 0 0 20px; }
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .stat-tile {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .stat-tile .label { font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; }
+  .stat-tile .value { font-size: 24px; font-weight: 700; }
+  .stat-tile .sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+  }
+  .card h2 { font-size: 15px; font-weight: 600; margin: 0 0 2px; }
+  .card .desc { font-size: 12.5px; color: var(--text-secondary); margin: 0 0 12px; }
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  @media (max-width: 880px) {
+    .grid-2 { grid-template-columns: 1fr; }
+  }
+  .legend-note {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+  footer {
+    color: var(--text-muted);
+    font-size: 11.5px;
+    line-height: 1.6;
+    margin-top: 8px;
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+  }
+</style>
+</head>
+<body>
+<div class="viz-root">
+<div class="wrap">
+  <h1>Dublin City Terraced Houses Sold — €900k to €1.5m asking</h1>
+  <p class="subtitle">3–5 bed, 1–2 bath, sold 2024 onward · 139 properties · source: daft.ie sold-price register</p>
+
+  <div class="stat-row">
+    <div class="stat-tile">
+      <div class="label">Properties sold</div>
+      <div class="value">139</div>
+    </div>
+    <div class="stat-tile">
+      <div class="label">Median sold price</div>
+      <div class="value">€1,200,000</div>
+      <div class="sub">range €600,000 – €1,725,000</div>
+    </div>
+    <div class="stat-tile">
+      <div class="label">Median vs. asking</div>
+      <div class="value">+5.3%</div>
+      <div class="sub">sold price vs. last asking price</div>
+    </div>
+    <div class="stat-tile">
+      <div class="label">Sold above asking</div>
+      <div class="value">75.0%</div>
+      <div class="sub">19.1% sold below asking</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Where they sold</h2>
+    <p class="desc">Hover any point for address, sold price, and asking price. Color = sold price (darker = higher). Fainter points are neighborhood-level approximations where the exact address couldn't be pinpointed.</p>
+    <div id="map" style="height:560px;"></div>
+    <div class="legend-note">85 of 139 addresses matched to an exact building; the remaining 54 are placed at their neighborhood's approximate center (shown at lower opacity) because the address lookup service couldn't resolve the exact building.</div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <h2>Sold price vs. asking price</h2>
+      <p class="desc">Points above the diagonal sold over asking (blue); below sold under asking (red). 75.0% of sales closed above asking.</p>
+      <div id="scatter-asking" style="height:420px;"></div>
+    </div>
+    <div class="card">
+      <h2>Price per m² by neighborhood</h2>
+      <p class="desc">Median sold price per square meter, areas with 3+ sales in this band.</p>
+      <div id="bar-area" style="height:420px;"></div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <h2>Sold prices over time</h2>
+      <p class="desc">Each sale plotted by close date. Orange line is a 10-sale rolling median.</p>
+      <div id="time-trend" style="height:380px;"></div>
+    </div>
+    <div class="card">
+      <h2>Median sold price by bedroom count</h2>
+      <p class="desc">5-bed homes in this price band skew smaller/less central — see footnote.</p>
+      <div id="bar-beds" style="height:380px;"></div>
+    </div>
+  </div>
+
+  <footer>
+    Data: daft.ie sold-properties register, Dublin City terraced houses, 3–5 bed / 1–2 bath, sold 2024 onward,
+    asking price €900,000–€1,500,000 (139 of 139 matching listings). Geocoding via OpenStreetMap Nominatim;
+    54 addresses fell back to a neighborhood-level centroid with random jitter when the exact building couldn't
+    be matched — treat those map positions as approximate, not the precise plot of sale. "Sold vs. asking" reflects
+    daft.ie's last listed asking price, which is not always the original asking price. The 5-bed median sold price
+    (€1,055,000) sits below the 3- and 4-bed medians in this
+    sample — with only 11 five-bed sales here, that's a small-sample effect (several are further-out or lower-spec
+    properties) rather than a market signal that bigger homes sell cheaper.
+  </footer>
+</div>
+</div>
+
+<script>
+const rows = [{"address": "Coolbawn, 13 Railway Rd, Dalkey, Dublin", "sold_date": "22/05/2024", "sold_price_eur": 1700000, "asking_price_eur": 1500000, "beds": 3, "baths": 2, "size_m2": 180.0, "lat": 53.276234, "lon": -6.103392, "location_precision": "exact", "sold_date_iso": "2024-05-22"}, {"address": "16 Railway Rd, Dalkey, Dublin", "sold_date": "13/01/2025", "sold_price_eur": 1585000, "asking_price_eur": 1500000, "beds": 4, "baths": 1, "size_m2": 170.0, "lat": 53.276234, "lon": -6.103392, "location_precision": "exact", "sold_date_iso": "2025-01-13"}, {"address": "28 Belgrave Rd, Rathmines, Dublin 6, Dublin", "sold_date": "24/09/2024", "sold_price_eur": 1725000, "asking_price_eur": 1500000, "beds": 4, "baths": 1, "size_m2": 208.0, "lat": 53.320786, "lon": -6.260442, "location_precision": "exact", "sold_date_iso": "2024-09-24"}, {"address": "197 Upper Rathmines Rd, Rathmines, Dublin 6, Dublin", "sold_date": "28/04/2026", "sold_price_eur": 1560000, "asking_price_eur": 1500000, "beds": 4, "baths": 2, "size_m2": 182.0, "lat": 53.31484, "lon": -6.264921, "location_precision": "exact", "sold_date_iso": "2026-04-28"}, {"address": "3 Wellington Place, Ballsbridge, Dublin 4, Dublin", "sold_date": "28/05/2026", "sold_price_eur": 1470000, "asking_price_eur": 1495000, "beds": 3, "baths": 2, "size_m2": 188.1, "lat": 53.324964, "lon": -6.219989, "location_precision": "approx (area-level)", "sold_date_iso": "2026-05-28"}, {"address": "147 Tritonville Rd, Sandymount, Dublin 4, Dublin", "sold_date": "10/06/2025", "sold_price_eur": 1510000, "asking_price_eur": 1495000, "beds": 4, "baths": 2, "size_m2": 168.0, "lat": 53.332491, "lon": -6.222062, "location_precision": "exact", "sold_date_iso": "2025-06-10"}, {"address": "26 Charleston Avenue, Ranelagh, Dublin 6, Dublin", "sold_date": "21/04/2026", "sold_price_eur": 1620000, "asking_price_eur": 1495000, "beds": 4, "baths": 2, "size_m2": 170.0, "lat": 53.322738, "lon": -6.257998, "location_precision": "exact", "sold_date_iso": "2026-04-21"}, {"address": "135 Leinster Road, Rathmines, Dublin 6, Dublin", "sold_date": "27/04/2026", "sold_price_eur": 1685000, "asking_price_eur": 1490000, "beds": 5, "baths": 2, "size_m2": 281.0, "lat": 53.322925, "lon": -6.271159, "location_precision": "exact", "sold_date_iso": "2026-04-27"}, {"address": "The Mews, 126 Ranelagh Village, Dublin 6, Dublin", "sold_date": "06/09/2024", "sold_price_eur": 600000, "asking_price_eur": 1475000, "beds": 5, "baths": 2, "size_m2": 265.0, "lat": 53.324445, "lon": -6.252853, "location_precision": "exact", "sold_date_iso": "2024-09-06"}, {"address": "109 Upper Leeson St, Dublin 4, Dublin", "sold_date": "06/11/2025", "sold_price_eur": 1510000, "asking_price_eur": 1450000, "beds": 3, "baths": 2, "size_m2": 192.0, "lat": 53.329423, "lon": -6.250646, "location_precision": "exact", "sold_date_iso": "2025-11-06"}, {"address": "17 Heytesbury St, Dublin 8, Dublin", "sold_date": "31/07/2024", "sold_price_eur": 1375000, "asking_price_eur": 1450000, "beds": 3, "baths": 2, "size_m2": null, "lat": 53.334996, "lon": -6.269037, "location_precision": "exact", "sold_date_iso": "2024-07-31"}, {"address": "12 Mulgrave Terrace, Dun Laoghaire, Dublin", "sold_date": "15/08/2025", "sold_price_eur": 1651324, "asking_price_eur": 1450000, "beds": 3, "baths": 2, "size_m2": 197.0, "lat": 53.287958, "lon": -6.137589, "location_precision": "exact", "sold_date_iso": "2025-08-15"}, {"address": "29 Haddington Rd, Dublin 4, Dublin", "sold_date": "26/06/2025", "sold_price_eur": 1640000, "asking_price_eur": 1450000, "beds": 4, "baths": 2, "size_m2": 191.0, "lat": 53.334383, "lon": -6.243407, "location_precision": "exact", "sold_date_iso": "2025-06-26"}, {"address": "16 Vernon Ave, Clontarf, Dublin, Dublin 3", "sold_date": "01/04/2026", "sold_price_eur": 1500000, "asking_price_eur": 1445000, "beds": 3, "baths": 2, "size_m2": 188.0, "lat": 53.361865, "lon": -6.195643, "location_precision": "exact", "sold_date_iso": "2026-04-01"}, {"address": "52 Heytesbury Street, Portobello, Dublin 8, Dublin", "sold_date": "05/12/2025", "sold_price_eur": 1450000, "asking_price_eur": 1425000, "beds": 5, "baths": 2, "size_m2": 187.0, "lat": 53.330867, "lon": -6.268128, "location_precision": "approx (area-level)", "sold_date_iso": "2025-12-05"}, {"address": "34 Raglan Lane, Ballsbridge, Dublin 4, Dublin", "sold_date": "01/04/2026", "sold_price_eur": 1450000, "asking_price_eur": 1400000, "beds": 3, "baths": 2, "size_m2": 117.0, "lat": 53.325255, "lon": -6.218034, "location_precision": "approx (area-level)", "sold_date_iso": "2026-04-01"}, {"address": "12 Sandycove Avenue East, Glasthule, Dun Laoghaire, Dublin", "sold_date": "05/12/2025", "sold_price_eur": 650000, "asking_price_eur": 1400000, "beds": 4, "baths": 2, "size_m2": 132.0, "lat": 53.2896, "lon": -6.134202, "location_precision": "approx (area-level)", "sold_date_iso": "2025-12-05"}, {"address": "6 Royal Terrace West, Dun Laoghaire, Co Dublin, Dublin", "sold_date": "25/08/2025", "sold_price_eur": 1501008, "asking_price_eur": 1400000, "beds": 4, "baths": 2, "size_m2": 250.0, "lat": 53.286916, "lon": -6.137666, "location_precision": "exact", "sold_date_iso": "2025-08-25"}, {"address": "69 Moyne Rd, Ranelagh, Dublin 6, Dublin", "sold_date": "08/01/2024", "sold_price_eur": 1480000, "asking_price_eur": 1400000, "beds": 4, "baths": 2, "size_m2": 170.0, "lat": 53.322724, "lon": -6.25476, "location_precision": "approx (area-level)", "sold_date_iso": "2024-01-08"}, {"address": "51 Belmont Ave, Donnybrook, Dublin 4, Dublin", "sold_date": "14/10/2024", "sold_price_eur": 1360000, "asking_price_eur": 1395000, "beds": 5, "baths": 2, "size_m2": 185.0, "lat": 53.321388, "lon": -6.240126, "location_precision": "exact", "sold_date_iso": "2024-10-14"}, {"address": "13 Clarinda Park North, Dun Laoghaire, Co Dublin, Dublin", "sold_date": "19/11/2025", "sold_price_eur": 1505000, "asking_price_eur": 1395000, "beds": 4, "baths": 1, "size_m2": 310.0, "lat": 53.289208, "lon": -6.130345, "location_precision": "exact", "sold_date_iso": "2025-11-19"}, {"address": "15 Sallymount Ave, Ranelagh, Dublin 6, Dublin", "sold_date": "23/01/2026", "sold_price_eur": 1500000, "asking_price_eur": 1350000, "beds": 4, "baths": 2, "size_m2": 149.0, "lat": 53.322114, "lon": -6.253333, "location_precision": "approx (area-level)", "sold_date_iso": "2026-01-23"}, {"address": "9 Beechwood Avenue Lower, Ranelagh, Dublin 6, Dublin", "sold_date": "30/10/2025", "sold_price_eur": 1425000, "asking_price_eur": 1350000, "beds": 3, "baths": 2, "size_m2": 124.0, "lat": 53.321492, "lon": -6.254391, "location_precision": "exact", "sold_date_iso": "2025-10-30"}, {"address": "18 Eaton Square, Terenure, Dublin 6w, Dublin", "sold_date": "24/10/2024", "sold_price_eur": 1390000, "asking_price_eur": 1350000, "beds": 4, "baths": 2, "size_m2": 163.0, "lat": 53.312655, "lon": -6.285577, "location_precision": "exact", "sold_date_iso": "2024-10-24"}, {"address": "95 Leinster Rd, Rathmines, Dublin 6, Dublin", "sold_date": "14/08/2025", "sold_price_eur": 1535000, "asking_price_eur": 1350000, "beds": 4, "baths": 2, "size_m2": 204.0, "lat": 53.321896, "lon": -6.278949, "location_precision": "exact", "sold_date_iso": "2025-08-14"}, {"address": "31 Frascati Park, Blackrock, Dublin", "sold_date": "01/08/2024", "sold_price_eur": 1475000, "asking_price_eur": 1350000, "beds": 3, "baths": 2, "size_m2": 197.4, "lat": 53.300647, "lon": -6.183474, "location_precision": "exact", "sold_date_iso": "2024-08-01"}, {"address": "86 Hollybrook Road, Clontarf, Dublin 3, Dublin", "sold_date": "30/06/2026", "sold_price_eur": 1355000, "asking_price_eur": 1350000, "beds": 3, "baths": 2, "size_m2": 186.0, "lat": 53.364579, "lon": -6.217975, "location_precision": "exact", "sold_date_iso": "2026-06-30"}, {"address": "3 Munster Terrace, Sandycove, Dublin", "sold_date": "23/04/2024", "sold_price_eur": 1400000, "asking_price_eur": 1350000, "beds": 4, "baths": 2, "size_m2": 225.0, "lat": 53.28658, "lon": -6.122903, "location_precision": "approx (area-level)", "sold_date_iso": "2024-04-23"}, {"address": "18 Moyne Rd, Ranelagh, Dublin 6, Dublin", "sold_date": "27/02/2025", "sold_price_eur": 1517441, "asking_price_eur": 1300000, "beds": 3, "baths": 2, "size_m2": 137.0, "lat": 53.323408, "lon": -6.253214, "location_precision": "approx (area-level)", "sold_date_iso": "2025-02-27"}, {"address": "43 Sandymount Road, Dublin 4, Dublin", "sold_date": "15/12/2025", "sold_price_eur": 1400000, "asking_price_eur": 1300000, "beds": 3, "baths": 2, "size_m2": 181.0, "lat": 53.334888, "lon": -6.219277, "location_precision": "exact", "sold_date_iso": "2025-12-15"}, {"address": "12 Burrow Rd, Sutton, Dublin 13, Dublin", "sold_date": "16/05/2025", "sold_price_eur": 1450000, "asking_price_eur": 1300000, "beds": 4, "baths": 2, "size_m2": 180.0, "lat": 53.391764, "lon": -6.104308, "location_precision": "exact", "sold_date_iso": "2025-05-16"}, {"address": "2 Morehampton Terrace, Donnybrook, Dublin 4, Dublin", "sold_date": "10/01/2025", "sold_price_eur": 1300000, "asking_price_eur": 1300000, "beds": 3, "baths": 2, "size_m2": 134.0, "lat": 53.32489, "lon": -6.242112, "location_precision": "exact", "sold_date_iso": "2025-01-10"}, {"address": "35 Eaton Sq, Terenure, Dublin 6w, Dublin", "sold_date": "26/06/2026", "sold_price_eur": 1280000, "asking_price_eur": 1295000, "beds": 5, "baths": 2, "size_m2": 193.1, "lat": 53.312655, "lon": -6.285577, "location_precision": "exact", "sold_date_iso": "2026-06-26"}, {"address": "27 Vavasour Sq, Sandymount, Dublin 4, Dublin", "sold_date": "16/04/2025", "sold_price_eur": 1550000, "asking_price_eur": 1295000, "beds": 3, "baths": 2, "size_m2": 158.0, "lat": 53.331082, "lon": -6.217343, "location_precision": "approx (area-level)", "sold_date_iso": "2025-04-16"}, {"address": "36 Oakley Rd, Ranelagh, Dublin 6, Dublin", "sold_date": "01/02/2024", "sold_price_eur": 1170000, "asking_price_eur": 1295000, "beds": 3, "baths": 2, "size_m2": 186.0, "lat": 53.322906, "lon": -6.256476, "location_precision": "exact", "sold_date_iso": "2024-02-01"}, {"address": "57 Strand Road, Sandymount, Dublin 4, Dublin", "sold_date": "01/10/2024", "sold_price_eur": 1410000, "asking_price_eur": 1295000, "beds": 3, "baths": 2, "size_m2": 201.0, "lat": 53.328919, "lon": -6.209244, "location_precision": "exact", "sold_date_iso": "2024-10-01"}, {"address": "7 Terenure Park, Terenure, Dublin 6w, Dublin", "sold_date": "13/02/2026", "sold_price_eur": 1270000, "asking_price_eur": 1295000, "beds": 4, "baths": 2, "size_m2": 188.0, "lat": 53.310742, "lon": -6.286048, "location_precision": "exact", "sold_date_iso": "2026-02-13"}, {"address": "2 Phoenix Terrace, Blackrock, Dublin", "sold_date": "14/03/2025", "sold_price_eur": 1300000, "asking_price_eur": 1275000, "beds": 4, "baths": 2, "size_m2": 168.0, "lat": 53.304665, "lon": -6.186689, "location_precision": "exact", "sold_date_iso": "2025-03-14"}, {"address": "4 Bushfield Terrace, Donnybrook, Dublin 4, Dublin", "sold_date": "05/03/2024", "sold_price_eur": 1314499, "asking_price_eur": 1275000, "beds": 3, "baths": 2, "size_m2": 124.0, "lat": 53.323571, "lon": -6.246449, "location_precision": "exact", "sold_date_iso": "2024-03-05"}, {"address": "11 Mountpleasant Ave Upper, Ranelagh, Dublin 6, Dublin", "sold_date": "12/07/2024", "sold_price_eur": 1425000, "asking_price_eur": 1275000, "beds": 3, "baths": 2, "size_m2": 195.0, "lat": 53.323886, "lon": -6.254829, "location_precision": "approx (area-level)", "sold_date_iso": "2024-07-12"}, {"address": "16 Morehampton Terrace, Donnybrook, Dublin 4, Dublin", "sold_date": "17/11/2025", "sold_price_eur": 1290000, "asking_price_eur": 1275000, "beds": 3, "baths": 2, "size_m2": 133.0, "lat": 53.324431, "lon": -6.24323, "location_precision": "exact", "sold_date_iso": "2025-11-17"}, {"address": "13 Templemore Ave, Rathgar, Dublin 6, Dublin", "sold_date": "13/03/2026", "sold_price_eur": 1325000, "asking_price_eur": 1250000, "beds": 4, "baths": 2, "size_m2": 146.0, "lat": 53.317579, "lon": -6.270165, "location_precision": "approx (area-level)", "sold_date_iso": "2026-03-13"}, {"address": "4 Phoenix Terrace, Rock Rd, Blackrock, Dublin", "sold_date": "10/07/2024", "sold_price_eur": 1250000, "asking_price_eur": 1250000, "beds": 4, "baths": 1, "size_m2": 149.0, "lat": 53.300416, "lon": -6.187425, "location_precision": "approx (area-level)", "sold_date_iso": "2024-07-10"}, {"address": "305 Clontarf Rd, Dublin 3, Dublin", "sold_date": "23/08/2024", "sold_price_eur": 1180000, "asking_price_eur": 1250000, "beds": 5, "baths": 2, "size_m2": 202.0, "lat": 53.363584, "lon": -6.224481, "location_precision": "exact", "sold_date_iso": "2024-08-23"}, {"address": "4 Florence Terrace, Leeson Park Ave, Dublin 6, Dublin", "sold_date": "18/12/2024", "sold_price_eur": 1500000, "asking_price_eur": 1250000, "beds": 3, "baths": 2, "size_m2": 118.0, "lat": 53.324579, "lon": -6.26409, "location_precision": "approx (area-level)", "sold_date_iso": "2024-12-18"}, {"address": "19 Eaton Sq, Terenure, Dublin 6w, Dublin", "sold_date": "26/06/2026", "sold_price_eur": 1430000, "asking_price_eur": 1250000, "beds": 4, "baths": 2, "size_m2": 214.0, "lat": 53.312655, "lon": -6.285577, "location_precision": "exact", "sold_date_iso": "2026-06-26"}, {"address": "111 Leinster Rd, Rathmines, Dublin 6, Dublin", "sold_date": "19/05/2026", "sold_price_eur": 1372500, "asking_price_eur": 1250000, "beds": 3, "baths": 2, "size_m2": 164.0, "lat": 53.32147, "lon": -6.276652, "location_precision": "exact", "sold_date_iso": "2026-05-19"}, {"address": "12 Lennox Street, Portobello, Dublin 8, Dublin", "sold_date": "30/10/2024", "sold_price_eur": 1250000, "asking_price_eur": 1250000, "beds": 4, "baths": 2, "size_m2": 201.0, "lat": 53.331448, "lon": -6.265637, "location_precision": "exact", "sold_date_iso": "2024-10-30"}, {"address": "88 St Albans Park, Sandymount, Dublin 4, Dublin", "sold_date": "16/05/2025", "sold_price_eur": 1285000, "asking_price_eur": 1250000, "beds": 3, "baths": 2, "size_m2": 138.0, "lat": 53.330699, "lon": -6.218821, "location_precision": "approx (area-level)", "sold_date_iso": "2025-05-16"}, {"address": "85 Leinster Rd, Rathmines, Dublin 6, Dublin", "sold_date": "09/10/2025", "sold_price_eur": 1430000, "asking_price_eur": 1250000, "beds": 4, "baths": 2, "size_m2": 164.0, "lat": 53.319283, "lon": -6.264809, "location_precision": "exact", "sold_date_iso": "2025-10-09"}, {"address": "39 Chelmsford Rd, Ranelagh, Dublin 6, Dublin", "sold_date": "16/10/2024", "sold_price_eur": 1250000, "asking_price_eur": 1250000, "beds": 4, "baths": 2, "size_m2": 170.0, "lat": 53.324001, "lon": -6.253038, "location_precision": "approx (area-level)", "sold_date_iso": "2024-10-16"}, {"address": "2 Grantham St, Dublin 8, Dublin", "sold_date": "31/01/2024", "sold_price_eur": 1535000, "asking_price_eur": 1250000, "beds": 4, "baths": 2, "size_m2": 212.0, "lat": 53.334289, "lon": -6.26641, "location_precision": "exact", "sold_date_iso": "2024-01-31"}, {"address": "13 Moyne Road, Ranelagh, Dublin 6, Dublin", "sold_date": "22/11/2024", "sold_price_eur": 1230000, "asking_price_eur": 1250000, "beds": 3, "baths": 1, "size_m2": 107.0, "lat": 53.32388, "lon": -6.25266, "location_precision": "approx (area-level)", "sold_date_iso": "2024-11-22"}, {"address": "4 Leinster Road West, Rathmines, Dublin 6, Dublin", "sold_date": "12/02/2026", "sold_price_eur": 1650000, "asking_price_eur": 1250000, "beds": 4, "baths": 2, "size_m2": 222.0, "lat": 53.32418, "lon": -6.267255, "location_precision": "exact", "sold_date_iso": "2026-02-12"}, {"address": "16 Rathmines Park, Rathmines, Dublin 6, Dublin", "sold_date": "08/07/2025", "sold_price_eur": 1200000, "asking_price_eur": 1250000, "beds": 4, "baths": 2, "size_m2": 186.0, "lat": 53.319696, "lon": -6.266445, "location_precision": "exact", "sold_date_iso": "2025-07-08"}, {"address": "105 St Lawrence Road, Clontarf, Dublin 3, Dublin", "sold_date": "04/09/2025", "sold_price_eur": 1260000, "asking_price_eur": 1250000, "beds": 4, "baths": 2, "size_m2": 178.0, "lat": 53.364835, "lon": -6.214571, "location_precision": "exact", "sold_date_iso": "2025-09-04"}, {"address": "14 Mornington Road, Ranelagh, Dublin 6, Dublin", "sold_date": "01/03/2024", "sold_price_eur": 1270000, "asking_price_eur": 1250000, "beds": 3, "baths": 2, "size_m2": 140.0, "lat": 53.322269, "lon": -6.252002, "location_precision": "exact", "sold_date_iso": "2024-03-01"}, {"address": "3 Windsor Terrace, Dun Laoghaire, Dublin", "sold_date": "08/12/2025", "sold_price_eur": 1000000, "asking_price_eur": 1250000, "beds": 4, "baths": 2, "size_m2": 180.0, "lat": 53.290343, "lon": -6.12733, "location_precision": "exact", "sold_date_iso": "2025-12-08"}, {"address": "34 Seafort Ave, Sandymount, Dublin 4, Dublin", "sold_date": "19/12/2025", "sold_price_eur": 1400000, "asking_price_eur": 1235000, "beds": 4, "baths": 2, "size_m2": 175.0, "lat": 53.333725, "lon": -6.212658, "location_precision": "exact", "sold_date_iso": "2025-12-19"}, {"address": "8 Mountpleasant Avenue Upper, Dublin 6, Dublin", "sold_date": "21/07/2025", "sold_price_eur": 1160000, "asking_price_eur": 1225000, "beds": 3, "baths": 2, "size_m2": 212.0, "lat": 53.325908, "lon": -6.26054, "location_precision": "exact", "sold_date_iso": "2025-07-21"}, {"address": "33 St Lawrence Rd, Clontarf, Dublin 3, Dublin", "sold_date": "16/06/2025", "sold_price_eur": 1270000, "asking_price_eur": 1200000, "beds": 4, "baths": 2, "size_m2": 192.0, "lat": 53.364835, "lon": -6.214571, "location_precision": "exact", "sold_date_iso": "2025-06-16"}, {"address": "10 Anna Villa, Ranelagh, Dublin 6, Dublin", "sold_date": "21/07/2026", "sold_price_eur": 1254800, "asking_price_eur": 1200000, "beds": 3, "baths": 2, "size_m2": 153.0, "lat": 53.322709, "lon": -6.250963, "location_precision": "exact", "sold_date_iso": "2026-07-21"}, {"address": "20 Moyne Road, Ranelagh, Dublin 6, Dublin", "sold_date": "04/03/2024", "sold_price_eur": 1320000, "asking_price_eur": 1200000, "beds": 4, "baths": 2, "size_m2": 142.0, "lat": 53.323067, "lon": -6.25193, "location_precision": "approx (area-level)", "sold_date_iso": "2024-03-04"}, {"address": "3 Chelmsford Ave, Ranelagh, Dublin 6, Dublin", "sold_date": "05/03/2026", "sold_price_eur": 1260000, "asking_price_eur": 1200000, "beds": 3, "baths": 1, "size_m2": null, "lat": 53.322594, "lon": -6.253193, "location_precision": "approx (area-level)", "sold_date_iso": "2026-03-05"}, {"address": "3 Maretimo Terrace, Newtown Ave, Blackrock, Dublin", "sold_date": "16/07/2026", "sold_price_eur": 1410000, "asking_price_eur": 1200000, "beds": 3, "baths": 2, "size_m2": 149.0, "lat": 53.299928, "lon": -6.1721, "location_precision": "exact", "sold_date_iso": "2026-07-16"}, {"address": "11 Mountpleasant Ave Lower, Ranelagh, Dublin 6, Dublin", "sold_date": "17/05/2024", "sold_price_eur": 1270000, "asking_price_eur": 1200000, "beds": 3, "baths": 2, "size_m2": 160.0, "lat": 53.323946, "lon": -6.252993, "location_precision": "approx (area-level)", "sold_date_iso": "2024-05-17"}, {"address": "43 Tritonville Road, Sandymount, Dublin 4, Dublin", "sold_date": "09/09/2025", "sold_price_eur": 1300000, "asking_price_eur": 1195000, "beds": 3, "baths": 2, "size_m2": 143.0, "lat": 53.333006, "lon": -6.217379, "location_precision": "approx (area-level)", "sold_date_iso": "2025-09-09"}, {"address": "50 Mount Pleasant Ave Upper, Rathmines, Dublin 6, Dublin", "sold_date": "19/09/2024", "sold_price_eur": 1205000, "asking_price_eur": 1195000, "beds": 3, "baths": 2, "size_m2": 168.0, "lat": 53.325132, "lon": -6.260769, "location_precision": "exact", "sold_date_iso": "2024-09-19"}, {"address": "2 Windsor Terrace, Portbello, Dublin 8, Dublin", "sold_date": "24/03/2025", "sold_price_eur": 1200000, "asking_price_eur": 1195000, "beds": 3, "baths": 2, "size_m2": 130.0, "lat": 53.334053, "lon": -6.269983, "location_precision": "approx (area-level)", "sold_date_iso": "2025-03-24"}, {"address": "47 Templemore Ave, Rathgar, Dublin 6, Dublin", "sold_date": "15/10/2025", "sold_price_eur": 1200000, "asking_price_eur": 1175000, "beds": 4, "baths": 2, "size_m2": 131.0, "lat": 53.315845, "lon": -6.271391, "location_precision": "approx (area-level)", "sold_date_iso": "2025-10-15"}, {"address": "64 Frankfort Ave, Rathgar, Dublin 6, Dublin", "sold_date": "12/06/2026", "sold_price_eur": 1150000, "asking_price_eur": 1175000, "beds": 3, "baths": 1, "size_m2": 137.0, "lat": 53.316662, "lon": -6.270759, "location_precision": "exact", "sold_date_iso": "2026-06-12"}, {"address": "3 Crofton Terrace, Crofton Road, Dun Laoghaire, Dublin", "sold_date": "16/09/2025", "sold_price_eur": 1185000, "asking_price_eur": 1175000, "beds": 4, "baths": 2, "size_m2": 172.0, "lat": 53.287163, "lon": -6.133764, "location_precision": "approx (area-level)", "sold_date_iso": "2025-09-16"}, {"address": "37 Tritonville Rd, Sandymount, Dublin 4, Dublin", "sold_date": "09/08/2024", "sold_price_eur": 1260000, "asking_price_eur": 1150000, "beds": 3, "baths": 2, "size_m2": 154.0, "lat": 53.332491, "lon": -6.222062, "location_precision": "exact", "sold_date_iso": "2024-08-09"}, {"address": "7 Monkstown Road, Monkstown, Co Dublin, Dublin", "sold_date": "06/07/2026", "sold_price_eur": 1295000, "asking_price_eur": 1150000, "beds": 3, "baths": 2, "size_m2": 110.0, "lat": 53.295619, "lon": -6.167804, "location_precision": "exact", "sold_date_iso": "2026-07-06"}, {"address": "27 Londonbridge Road, Sandymount, Dublin 4, Dublin", "sold_date": "16/04/2025", "sold_price_eur": 1365000, "asking_price_eur": 1150000, "beds": 3, "baths": 2, "size_m2": 128.0, "lat": 53.330724, "lon": -6.218277, "location_precision": "approx (area-level)", "sold_date_iso": "2025-04-16"}, {"address": "222 Clontarf Road, Clontarf, Dublin 2, Dublin", "sold_date": "24/03/2026", "sold_price_eur": 1125000, "asking_price_eur": 1125000, "beds": 3, "baths": 2, "size_m2": 171.3, "lat": 53.363977, "lon": -6.212381, "location_precision": "approx (area-level)", "sold_date_iso": "2026-03-24"}, {"address": "25 Bath Ave, Beggars Bush, Sandymount Dublin 4, Dublin 4, Dublin", "sold_date": "08/07/2025", "sold_price_eur": 1110000, "asking_price_eur": 1100000, "beds": 3, "baths": 2, "size_m2": 180.0, "lat": 53.331531, "lon": -6.218482, "location_precision": "approx (area-level)", "sold_date_iso": "2025-07-08"}, {"address": "4 Ashfield Avenue, Ranelagh, Dublin 6, Dublin", "sold_date": "30/05/2025", "sold_price_eur": 1225000, "asking_price_eur": 1100000, "beds": 3, "baths": 2, "size_m2": 107.0, "lat": 53.32333, "lon": -6.252063, "location_precision": "exact", "sold_date_iso": "2025-05-30"}, {"address": "89 Lower Beechmount Ave, Ranelagh, Dublin 6, Dublin", "sold_date": "30/01/2024", "sold_price_eur": 1050000, "asking_price_eur": 1100000, "beds": 4, "baths": 2, "size_m2": 123.3, "lat": 53.322259, "lon": -6.252039, "location_precision": "approx (area-level)", "sold_date_iso": "2024-01-30"}, {"address": "3 Heytesbury Court, Pembroke Lane, Ballsbridge Dublin 4, Dublin 4, Dublin", "sold_date": "22/08/2024", "sold_price_eur": 1030000, "asking_price_eur": 1100000, "beds": 3, "baths": 2, "size_m2": 137.0, "lat": 53.32499, "lon": -6.218237, "location_precision": "approx (area-level)", "sold_date_iso": "2024-08-22"}, {"address": "16 Gilford Dr, Sandymount, Dublin 4, Dublin", "sold_date": "08/03/2024", "sold_price_eur": 1060000, "asking_price_eur": 1100000, "beds": 3, "baths": 2, "size_m2": 135.0, "lat": 53.328442, "lon": -6.215911, "location_precision": "exact", "sold_date_iso": "2024-03-08"}, {"address": "30 Victoria Ave, Donnybrook, Dublin 4, Dublin", "sold_date": "18/02/2026", "sold_price_eur": 1100000, "asking_price_eur": 1100000, "beds": 3, "baths": 1, "size_m2": 118.0, "lat": 53.322619, "lon": -6.237624, "location_precision": "exact", "sold_date_iso": "2026-02-18"}, {"address": "26 Ardee Rd, Rathmines, Dublin 6, Dublin", "sold_date": "31/07/2024", "sold_price_eur": 1115000, "asking_price_eur": 1100000, "beds": 4, "baths": 2, "size_m2": 166.0, "lat": 53.325896, "lon": -6.266407, "location_precision": "exact", "sold_date_iso": "2024-07-31"}, {"address": "3 Moyne Rd, Ranelagh, Dublin 6, Dublin", "sold_date": "25/07/2025", "sold_price_eur": 1200000, "asking_price_eur": 1100000, "beds": 4, "baths": 1, "size_m2": 130.0, "lat": 53.321972, "lon": -6.252662, "location_precision": "approx (area-level)", "sold_date_iso": "2025-07-25"}, {"address": "73 Lower Beechwood Ave, Ranelagh, Dublin 6, Dublin", "sold_date": "08/04/2026", "sold_price_eur": 1200000, "asking_price_eur": 1100000, "beds": 4, "baths": 2, "size_m2": null, "lat": 53.323655, "lon": -6.254341, "location_precision": "exact", "sold_date_iso": "2026-04-08"}, {"address": "23 Havelock Sq, Bath Ave, Sandymount Dublin 4, Dublin 4, Dublin", "sold_date": "19/03/2025", "sold_price_eur": 1180000, "asking_price_eur": 1050000, "beds": 3, "baths": 2, "size_m2": 140.0, "lat": 53.330911, "lon": -6.217972, "location_precision": "approx (area-level)", "sold_date_iso": "2025-03-19"}, {"address": "57 Moyne Road, Ranelagh, Dublin 6, Dublin", "sold_date": "30/03/2026", "sold_price_eur": 1200000, "asking_price_eur": 1000000, "beds": 4, "baths": 2, "size_m2": 140.0, "lat": 53.324427, "lon": -6.252929, "location_precision": "approx (area-level)", "sold_date_iso": "2026-03-30"}, {"address": "6 Moyne Road, Ranelagh, Dublin 6, Dublin", "sold_date": "19/12/2025", "sold_price_eur": 1195000, "asking_price_eur": 1000000, "beds": 4, "baths": 1, "size_m2": 140.0, "lat": 53.323129, "lon": -6.252795, "location_precision": "approx (area-level)", "sold_date_iso": "2025-12-19"}, {"address": "30 Merrion Strand, Strand Rd, Sandymount Dublin 4, Dublin 4, Dublin", "sold_date": "27/08/2025", "sold_price_eur": 1200000, "asking_price_eur": 1000000, "beds": 4, "baths": 2, "size_m2": 157.8, "lat": 53.332949, "lon": -6.216783, "location_precision": "approx (area-level)", "sold_date_iso": "2025-08-27"}, {"address": "10 Auburn Ave, Donnybrook, Dublin 4, Dublin", "sold_date": "05/07/2024", "sold_price_eur": 1025000, "asking_price_eur": 995000, "beds": 4, "baths": 1, "size_m2": 152.0, "lat": 53.321728, "lon": -6.241732, "location_precision": "approx (area-level)", "sold_date_iso": "2024-07-05"}, {"address": "5 St Peters Terrace, Sandycove, Dublin", "sold_date": "19/07/2024", "sold_price_eur": 950000, "asking_price_eur": 995000, "beds": 3, "baths": 2, "size_m2": 105.0, "lat": 53.287446, "lon": -6.122697, "location_precision": "approx (area-level)", "sold_date_iso": "2024-07-19"}, {"address": "588 South Circular Rd, Kilmainham, Dublin 8, Dublin", "sold_date": "14/05/2026", "sold_price_eur": 1100000, "asking_price_eur": 995000, "beds": 3, "baths": 2, "size_m2": 160.0, "lat": 53.3424, "lon": -6.307871, "location_precision": "exact", "sold_date_iso": "2026-05-14"}, {"address": "10 Fortfield Ave, Terenure, Dublin 6w, Dublin", "sold_date": "07/04/2025", "sold_price_eur": 1055000, "asking_price_eur": 995000, "beds": 5, "baths": 1, "size_m2": 147.0, "lat": 53.31131, "lon": -6.284366, "location_precision": "approx (area-level)", "sold_date_iso": "2025-04-07"}, {"address": "35 Eden Rd Upper, Glenageary, Co Dublin, Dublin", "sold_date": "29/10/2024", "sold_price_eur": 1035000, "asking_price_eur": 995000, "beds": 3, "baths": 2, "size_m2": 128.0, "lat": 53.286261, "lon": -6.128895, "location_precision": "exact", "sold_date_iso": "2024-10-29"}, {"address": "5 Belmont Avenue, Donnybrook, Dublin 4, Dublin", "sold_date": "13/02/2026", "sold_price_eur": 1035000, "asking_price_eur": 995000, "beds": 4, "baths": 2, "size_m2": 135.0, "lat": 53.319755, "lon": -6.243108, "location_precision": "exact", "sold_date_iso": "2026-02-13"}, {"address": "Apt 1, 129 Anglesea Road, Donnybrook, Dublin", "sold_date": "04/06/2025", "sold_price_eur": 1190000, "asking_price_eur": 990000, "beds": 4, "baths": 2, "size_m2": null, "lat": 53.320977, "lon": -6.235057, "location_precision": "exact", "sold_date_iso": "2025-06-04"}, {"address": "90 St Lawrence Road, Clontarf, Dublin 3, Dublin", "sold_date": "27/09/2024", "sold_price_eur": 960000, "asking_price_eur": 985000, "beds": 5, "baths": 1, "size_m2": 180.0, "lat": 53.364835, "lon": -6.214571, "location_precision": "exact", "sold_date_iso": "2024-09-27"}, {"address": "28 Curzon St, Dublin 8, Dublin", "sold_date": "27/02/2026", "sold_price_eur": 1200000, "asking_price_eur": 975000, "beds": 3, "baths": 2, "size_m2": 132.0, "lat": 53.333373, "lon": -6.26926, "location_precision": "exact", "sold_date_iso": "2026-02-27"}, {"address": "31 Hollybank Avenue Lower, Ranelagh, Dublin 6, Dublin", "sold_date": "30/10/2024", "sold_price_eur": 1000000, "asking_price_eur": null, "beds": null, "baths": null, "size_m2": null, "lat": 53.324087, "lon": -6.253905, "location_precision": "approx (area-level)", "sold_date_iso": "2024-10-30"}, {"address": "13 Brickfield Way, Honeypark, Dun Laoghaire, Dublin", "sold_date": "08/04/2024", "sold_price_eur": 985000, "asking_price_eur": 975000, "beds": 5, "baths": 2, "size_m2": 205.0, "lat": 53.28889, "lon": -6.133276, "location_precision": "approx (area-level)", "sold_date_iso": "2024-04-08"}, {"address": "15 Ashfield Rd, Ranelagh, Dublin 6, Dublin", "sold_date": "28/02/2025", "sold_price_eur": 1063000, "asking_price_eur": 975000, "beds": 3, "baths": 2, "size_m2": 116.0, "lat": 53.32197, "lon": -6.253379, "location_precision": "exact", "sold_date_iso": "2025-02-28"}, {"address": "590 South Circular Rd, Kilmainham, Dublin 8, Dublin", "sold_date": "15/07/2025", "sold_price_eur": 1250000, "asking_price_eur": 975000, "beds": 4, "baths": 2, "size_m2": 175.0, "lat": 53.3424, "lon": -6.307871, "location_precision": "exact", "sold_date_iso": "2025-07-15"}, {"address": "3 Cherryfield Avenue Lower, Sandford Road, Dublin 6, Dublin", "sold_date": "23/05/2025", "sold_price_eur": 1085000, "asking_price_eur": null, "beds": null, "baths": null, "size_m2": null, "lat": 53.324451, "lon": -6.263723, "location_precision": "approx (area-level)", "sold_date_iso": "2025-05-23"}, {"address": "62 Frankfort Ave, Dublin 6, Dublin", "sold_date": "14/03/2025", "sold_price_eur": 1000000, "asking_price_eur": 975000, "beds": 3, "baths": 2, "size_m2": 131.0, "lat": 53.315956, "lon": -6.267647, "location_precision": "exact", "sold_date_iso": "2025-03-14"}, {"address": "3 Victoria Avenue, Donnybrook, Dublin 4, Dublin", "sold_date": "24/06/2024", "sold_price_eur": 1220000, "asking_price_eur": 975000, "beds": 3, "baths": 2, "size_m2": 126.0, "lat": 53.322619, "lon": -6.237624, "location_precision": "exact", "sold_date_iso": "2024-06-24"}, {"address": "39 Bothar Na Maighne, Raghnallach, Baile Atha Cliath 6, Dublin 6, Dublin", "sold_date": "02/05/2024", "sold_price_eur": 1000000, "asking_price_eur": 975000, "beds": 3, "baths": 2, "size_m2": 137.0, "lat": 53.319295, "lon": -6.25876, "location_precision": "approx (area-level)", "sold_date_iso": "2024-05-02"}, {"address": "48 Clarinda Park East, Dun Laoghaire, Co Dublin, Dublin", "sold_date": "18/12/2024", "sold_price_eur": 1015000, "asking_price_eur": 975000, "beds": 4, "baths": 2, "size_m2": 279.0, "lat": 53.287694, "lon": -6.131883, "location_precision": "exact", "sold_date_iso": "2024-12-18"}, {"address": "71 Manor St, Dublin 7, Dublin", "sold_date": "25/05/2026", "sold_price_eur": 940000, "asking_price_eur": 965000, "beds": 3, "baths": 2, "size_m2": 116.0, "lat": 53.352441, "lon": -6.284432, "location_precision": "exact", "sold_date_iso": "2026-05-25"}, {"address": "10 Charleville Road, Phibsboro, Dublin 7, Dublin", "sold_date": "06/02/2025", "sold_price_eur": 1080000, "asking_price_eur": 950000, "beds": 4, "baths": 2, "size_m2": 176.0, "lat": 53.357184, "lon": -6.277712, "location_precision": "approx (area-level)", "sold_date_iso": "2025-02-06"}, {"address": "14 Vernon Ave, Clontarf, Dublin 3, Dublin", "sold_date": "15/12/2025", "sold_price_eur": 950000, "asking_price_eur": 950000, "beds": 3, "baths": 2, "size_m2": 99.7, "lat": 53.359451, "lon": -6.196016, "location_precision": "exact", "sold_date_iso": "2025-12-15"}, {"address": "112 Sandford Rd, Ranelagh, Dublin 6, Dublin", "sold_date": "22/03/2024", "sold_price_eur": 975000, "asking_price_eur": null, "beds": null, "baths": null, "size_m2": null, "lat": 53.323068, "lon": -6.249346, "location_precision": "exact", "sold_date_iso": "2024-03-22"}, {"address": "7 Bessborough Parade, Dublin 6, Dublin", "sold_date": "20/02/2025", "sold_price_eur": 1200000, "asking_price_eur": 950000, "beds": 3, "baths": 1, "size_m2": 115.8, "lat": 53.327758, "lon": -6.262613, "location_precision": "exact", "sold_date_iso": "2025-02-20"}, {"address": "29 Chelmsford Avenue, Ranelagh, Dublin 6, Dublin", "sold_date": "09/10/2024", "sold_price_eur": 1100000, "asking_price_eur": 950000, "beds": 3, "baths": 1, "size_m2": 131.0, "lat": 53.323212, "lon": -6.252155, "location_precision": "approx (area-level)", "sold_date_iso": "2024-10-09"}, {"address": "20 Victoria Avenue, Donnybrook, Dublin 4, Dublin", "sold_date": "27/03/2024", "sold_price_eur": 1050000, "asking_price_eur": 950000, "beds": 3, "baths": 2, "size_m2": 125.6, "lat": 53.322619, "lon": -6.237624, "location_precision": "exact", "sold_date_iso": "2024-03-27"}, {"address": "35 Haddington Rd, Dublin 4, Dublin", "sold_date": "10/10/2024", "sold_price_eur": 902000, "asking_price_eur": 950000, "beds": 4, "baths": 2, "size_m2": 178.0, "lat": 53.334459, "lon": -6.243151, "location_precision": "exact", "sold_date_iso": "2024-10-10"}, {"address": "8 Kenilworth Park, Harolds Cross, Dublin 6w, Dublin", "sold_date": "16/12/2025", "sold_price_eur": 1005000, "asking_price_eur": 950000, "beds": 4, "baths": 2, "size_m2": 185.0, "lat": 53.317698, "lon": -6.283842, "location_precision": "approx (area-level)", "sold_date_iso": "2025-12-16"}, {"address": "14 Summerville Park, Rathmines, Dublin 6, Dublin", "sold_date": "20/03/2025", "sold_price_eur": 1110000, "asking_price_eur": 950000, "beds": 3, "baths": 2, "size_m2": 124.0, "lat": 53.319229, "lon": -6.263808, "location_precision": "exact", "sold_date_iso": "2025-03-20"}, {"address": "29 Pearse Sq, Pearse St, Dublin 2, Dublin", "sold_date": "23/07/2024", "sold_price_eur": 920000, "asking_price_eur": 950000, "beds": 3, "baths": 2, "size_m2": 204.0, "lat": 53.34277, "lon": -6.242047, "location_precision": "exact", "sold_date_iso": "2024-07-23"}, {"address": "219 Llandaff Terrace, Merrion Road, Dublin 4, Dublin", "sold_date": "02/01/2025", "sold_price_eur": 1050000, "asking_price_eur": 950000, "beds": 3, "baths": 2, "size_m2": 133.0, "lat": 53.324493, "lon": -6.219971, "location_precision": "approx (area-level)", "sold_date_iso": "2025-01-02"}, {"address": "95 Merrion Park, Blackrock, Co. Dublin, Dublin", "sold_date": "05/09/2025", "sold_price_eur": 1120000, "asking_price_eur": 950000, "beds": 3, "baths": 2, "size_m2": 149.9, "lat": 53.297853, "lon": -6.202388, "location_precision": "exact", "sold_date_iso": "2025-09-05"}, {"address": "2 Winton Ave, Rathgar, Dublin 6, Dublin", "sold_date": "20/05/2025", "sold_price_eur": 1005000, "asking_price_eur": 950000, "beds": 3, "baths": 2, "size_m2": 167.0, "lat": 53.315434, "lon": -6.272118, "location_precision": "approx (area-level)", "sold_date_iso": "2025-05-20"}, {"address": "50 Tritonville Rd, Sandymount, Dublin 4, Dublin", "sold_date": "05/02/2024", "sold_price_eur": 980000, "asking_price_eur": 950000, "beds": 4, "baths": 2, "size_m2": 156.0, "lat": 53.332491, "lon": -6.222062, "location_precision": "exact", "sold_date_iso": "2024-02-05"}, {"address": "4 Havelock Terrace, Sandymount, Dublin 4, Dublin", "sold_date": "01/02/2024", "sold_price_eur": 950000, "asking_price_eur": 945000, "beds": 3, "baths": 2, "size_m2": 104.3, "lat": 53.33075, "lon": -6.217228, "location_precision": "approx (area-level)", "sold_date_iso": "2024-02-01"}, {"address": "26 Cherryfield Ave Lower, Ranelagh, Dublin 6, Dublin", "sold_date": "27/09/2024", "sold_price_eur": 1050000, "asking_price_eur": 945000, "beds": 3, "baths": 2, "size_m2": 105.0, "lat": 53.323834, "lon": -6.253582, "location_precision": "approx (area-level)", "sold_date_iso": "2024-09-27"}, {"address": "165 Griffith Ave, Drumcondra, Dublin 9, Dublin", "sold_date": "23/06/2025", "sold_price_eur": 945000, "asking_price_eur": 945000, "beds": 4, "baths": 1, "size_m2": 131.0, "lat": 53.37458, "lon": -6.244432, "location_precision": "exact", "sold_date_iso": "2025-06-23"}, {"address": "81 Hollybrook Rd, Clontarf, Dublin 3, Dublin", "sold_date": "20/08/2025", "sold_price_eur": 950000, "asking_price_eur": 925000, "beds": 4, "baths": 1, "size_m2": 134.0, "lat": 53.364579, "lon": -6.217975, "location_precision": "exact", "sold_date_iso": "2025-08-20"}, {"address": "39 Kenilworth Park, Harolds Cross, Dublin 6w, Dublin", "sold_date": "27/03/2025", "sold_price_eur": 1112000, "asking_price_eur": 925000, "beds": 4, "baths": 2, "size_m2": 151.0, "lat": 53.316691, "lon": -6.283355, "location_precision": "approx (area-level)", "sold_date_iso": "2025-03-27"}, {"address": "2 Coulson Ave, Rathgar, Dublin 6, Dublin", "sold_date": "23/07/2025", "sold_price_eur": 1000000, "asking_price_eur": 925000, "beds": 4, "baths": 2, "size_m2": 126.0, "lat": 53.31815, "lon": -6.270672, "location_precision": "approx (area-level)", "sold_date_iso": "2025-07-23"}, {"address": "10 Casimir Rd, Harolds Cross, Dublin 6w, Dublin", "sold_date": "21/06/2024", "sold_price_eur": 990000, "asking_price_eur": 925000, "beds": 3, "baths": 2, "size_m2": 142.0, "lat": 53.319413, "lon": -6.281918, "location_precision": "approx (area-level)", "sold_date_iso": "2024-06-21"}, {"address": "38 Killeen Rd, Ranelagh, Dublin 6, Dublin", "sold_date": "17/07/2025", "sold_price_eur": 1110000, "asking_price_eur": 925000, "beds": 4, "baths": 2, "size_m2": 125.0, "lat": 53.321493, "lon": -6.252687, "location_precision": "approx (area-level)", "sold_date_iso": "2025-07-17"}, {"address": "43 Mount Merrion Ave, Blackrock, Dublin", "sold_date": "10/02/2025", "sold_price_eur": 865000, "asking_price_eur": 925000, "beds": 4, "baths": 1, "size_m2": 166.5, "lat": 53.301384, "lon": -6.187306, "location_precision": "exact", "sold_date_iso": "2025-02-10"}, {"address": "43 Shrewsbury Park, Ballsbridge, Dublin, Dublin 4", "sold_date": "25/04/2025", "sold_price_eur": 1110000, "asking_price_eur": 925000, "beds": 3, "baths": 2, "size_m2": 146.0, "lat": 53.324546, "lon": -6.218564, "location_precision": "exact", "sold_date_iso": "2025-04-25"}, {"address": "10 Henley Park, Churchtown, Dublin 14, Dublin", "sold_date": "15/01/2026", "sold_price_eur": 940000, "asking_price_eur": 920000, "beds": 5, "baths": 2, "size_m2": 147.0, "lat": 53.297268, "lon": -6.25621, "location_precision": "exact", "sold_date_iso": "2026-01-15"}, {"address": "10 Upper Hollybank Ave, Ranelagh, Dublin, Dublin 6", "sold_date": "24/05/2024", "sold_price_eur": 910000, "asking_price_eur": 915000, "beds": 3, "baths": 2, "size_m2": 130.0, "lat": 53.323503, "lon": -6.253238, "location_precision": "approx (area-level)", "sold_date_iso": "2024-05-24"}, {"address": "12 Florence St, Dublin 8, Dublin", "sold_date": "11/03/2025", "sold_price_eur": 870000, "asking_price_eur": 915000, "beds": 3, "baths": 1, "size_m2": 96.1, "lat": 53.331098, "lon": -6.269775, "location_precision": "exact", "sold_date_iso": "2025-03-11"}, {"address": "20 Wolseley St, South Circular Rd, Dublin 8, Dublin", "sold_date": "27/05/2025", "sold_price_eur": 1101402, "asking_price_eur": 915000, "beds": 3, "baths": 2, "size_m2": 101.7, "lat": 53.3383, "lon": -6.294577, "location_precision": "approx (area-level)", "sold_date_iso": "2025-05-27"}, {"address": "21 Kingsland Park Avenue, Portobello, Dublin 8, Dublin", "sold_date": "28/11/2025", "sold_price_eur": 1000000, "asking_price_eur": 905000, "beds": 3, "baths": 2, "size_m2": 112.0, "lat": 53.331637, "lon": -6.268958, "location_precision": "exact", "sold_date_iso": "2025-11-28"}, {"address": "89 Ashfield Road, Ranelagh, Dublin 6, Dublin", "sold_date": "08/10/2025", "sold_price_eur": 1009000, "asking_price_eur": 900000, "beds": 5, "baths": 1, "size_m2": 171.9, "lat": 53.323958, "lon": -6.253027, "location_precision": "exact", "sold_date_iso": "2025-10-08"}, {"address": "29 Leahys Terrace, Sandymount, Dublin 4, Dublin", "sold_date": "25/04/2025", "sold_price_eur": 850000, "asking_price_eur": 900000, "beds": 3, "baths": 2, "size_m2": 74.0, "lat": 53.330756, "lon": -6.217807, "location_precision": "approx (area-level)", "sold_date_iso": "2025-04-25"}];
+const areaStats = [{"area": "Donnybrook", "median_price_per_m2": 9322, "n": 9}, {"area": "Dublin 8", "median_price_per_m2": 9091, "n": 5}, {"area": "Ranelagh", "median_price_per_m2": 8706, "n": 25}, {"area": "Rathgar", "median_price_per_m2": 8394, "n": 5}, {"area": "Sandymount", "median_price_per_m2": 8305, "n": 16}, {"area": "Dublin 4", "median_price_per_m2": 7880, "n": 4}, {"area": "Portobello", "median_price_per_m2": 7754, "n": 3}, {"area": "Ballsbridge", "median_price_per_m2": 7709, "n": 4}, {"area": "Dublin 6", "median_price_per_m2": 7634, "n": 5}, {"area": "Blackrock", "median_price_per_m2": 7605, "n": 6}, {"area": "Rathmines", "median_price_per_m2": 7525, "n": 11}, {"area": "Clontarf", "median_price_per_m2": 7079, "n": 9}, {"area": "Harolds Cross", "median_price_per_m2": 6972, "n": 3}, {"area": "Terenure", "median_price_per_m2": 6755, "n": 5}, {"area": "Dun Laoghaire", "median_price_per_m2": 5240, "n": 8}];
+const bedStats = [{"beds": 3, "median_price": 1200000, "n": 70}, {"beds": 4, "median_price": 1250000, "n": 55}, {"beds": 5, "median_price": 1055000, "n": 11}];
+const premium = [{"address": "Coolbawn, 13 Railway Rd, Dalkey, Dublin", "sold_date": "22/05/2024", "asking": 1500000, "sold": 1700000, "pct": 13.3}, {"address": "16 Railway Rd, Dalkey, Dublin", "sold_date": "13/01/2025", "asking": 1500000, "sold": 1585000, "pct": 5.7}, {"address": "28 Belgrave Rd, Rathmines, Dublin 6, Dublin", "sold_date": "24/09/2024", "asking": 1500000, "sold": 1725000, "pct": 15.0}, {"address": "197 Upper Rathmines Rd, Rathmines, Dublin 6, Dublin", "sold_date": "28/04/2026", "asking": 1500000, "sold": 1560000, "pct": 4.0}, {"address": "3 Wellington Place, Ballsbridge, Dublin 4, Dublin", "sold_date": "28/05/2026", "asking": 1495000, "sold": 1470000, "pct": -1.7}, {"address": "147 Tritonville Rd, Sandymount, Dublin 4, Dublin", "sold_date": "10/06/2025", "asking": 1495000, "sold": 1510000, "pct": 1.0}, {"address": "26 Charleston Avenue, Ranelagh, Dublin 6, Dublin", "sold_date": "21/04/2026", "asking": 1495000, "sold": 1620000, "pct": 8.4}, {"address": "135 Leinster Road, Rathmines, Dublin 6, Dublin", "sold_date": "27/04/2026", "asking": 1490000, "sold": 1685000, "pct": 13.1}, {"address": "The Mews, 126 Ranelagh Village, Dublin 6, Dublin", "sold_date": "06/09/2024", "asking": 1475000, "sold": 600000, "pct": -59.3}, {"address": "109 Upper Leeson St, Dublin 4, Dublin", "sold_date": "06/11/2025", "asking": 1450000, "sold": 1510000, "pct": 4.1}, {"address": "17 Heytesbury St, Dublin 8, Dublin", "sold_date": "31/07/2024", "asking": 1450000, "sold": 1375000, "pct": -5.2}, {"address": "12 Mulgrave Terrace, Dun Laoghaire, Dublin", "sold_date": "15/08/2025", "asking": 1450000, "sold": 1651324, "pct": 13.9}, {"address": "29 Haddington Rd, Dublin 4, Dublin", "sold_date": "26/06/2025", "asking": 1450000, "sold": 1640000, "pct": 13.1}, {"address": "16 Vernon Ave, Clontarf, Dublin, Dublin 3", "sold_date": "01/04/2026", "asking": 1445000, "sold": 1500000, "pct": 3.8}, {"address": "52 Heytesbury Street, Portobello, Dublin 8, Dublin", "sold_date": "05/12/2025", "asking": 1425000, "sold": 1450000, "pct": 1.8}, {"address": "34 Raglan Lane, Ballsbridge, Dublin 4, Dublin", "sold_date": "01/04/2026", "asking": 1400000, "sold": 1450000, "pct": 3.6}, {"address": "12 Sandycove Avenue East, Glasthule, Dun Laoghaire, Dublin", "sold_date": "05/12/2025", "asking": 1400000, "sold": 650000, "pct": -53.6}, {"address": "6 Royal Terrace West, Dun Laoghaire, Co Dublin, Dublin", "sold_date": "25/08/2025", "asking": 1400000, "sold": 1501008, "pct": 7.2}, {"address": "69 Moyne Rd, Ranelagh, Dublin 6, Dublin", "sold_date": "08/01/2024", "asking": 1400000, "sold": 1480000, "pct": 5.7}, {"address": "51 Belmont Ave, Donnybrook, Dublin 4, Dublin", "sold_date": "14/10/2024", "asking": 1395000, "sold": 1360000, "pct": -2.5}, {"address": "13 Clarinda Park North, Dun Laoghaire, Co Dublin, Dublin", "sold_date": "19/11/2025", "asking": 1395000, "sold": 1505000, "pct": 7.9}, {"address": "15 Sallymount Ave, Ranelagh, Dublin 6, Dublin", "sold_date": "23/01/2026", "asking": 1350000, "sold": 1500000, "pct": 11.1}, {"address": "9 Beechwood Avenue Lower, Ranelagh, Dublin 6, Dublin", "sold_date": "30/10/2025", "asking": 1350000, "sold": 1425000, "pct": 5.6}, {"address": "18 Eaton Square, Terenure, Dublin 6w, Dublin", "sold_date": "24/10/2024", "asking": 1350000, "sold": 1390000, "pct": 3.0}, {"address": "95 Leinster Rd, Rathmines, Dublin 6, Dublin", "sold_date": "14/08/2025", "asking": 1350000, "sold": 1535000, "pct": 13.7}, {"address": "31 Frascati Park, Blackrock, Dublin", "sold_date": "01/08/2024", "asking": 1350000, "sold": 1475000, "pct": 9.3}, {"address": "86 Hollybrook Road, Clontarf, Dublin 3, Dublin", "sold_date": "30/06/2026", "asking": 1350000, "sold": 1355000, "pct": 0.4}, {"address": "3 Munster Terrace, Sandycove, Dublin", "sold_date": "23/04/2024", "asking": 1350000, "sold": 1400000, "pct": 3.7}, {"address": "18 Moyne Rd, Ranelagh, Dublin 6, Dublin", "sold_date": "27/02/2025", "asking": 1300000, "sold": 1517441, "pct": 16.7}, {"address": "43 Sandymount Road, Dublin 4, Dublin", "sold_date": "15/12/2025", "asking": 1300000, "sold": 1400000, "pct": 7.7}, {"address": "12 Burrow Rd, Sutton, Dublin 13, Dublin", "sold_date": "16/05/2025", "asking": 1300000, "sold": 1450000, "pct": 11.5}, {"address": "2 Morehampton Terrace, Donnybrook, Dublin 4, Dublin", "sold_date": "10/01/2025", "asking": 1300000, "sold": 1300000, "pct": 0.0}, {"address": "35 Eaton Sq, Terenure, Dublin 6w, Dublin", "sold_date": "26/06/2026", "asking": 1295000, "sold": 1280000, "pct": -1.2}, {"address": "27 Vavasour Sq, Sandymount, Dublin 4, Dublin", "sold_date": "16/04/2025", "asking": 1295000, "sold": 1550000, "pct": 19.7}, {"address": "36 Oakley Rd, Ranelagh, Dublin 6, Dublin", "sold_date": "01/02/2024", "asking": 1295000, "sold": 1170000, "pct": -9.7}, {"address": "57 Strand Road, Sandymount, Dublin 4, Dublin", "sold_date": "01/10/2024", "asking": 1295000, "sold": 1410000, "pct": 8.9}, {"address": "7 Terenure Park, Terenure, Dublin 6w, Dublin", "sold_date": "13/02/2026", "asking": 1295000, "sold": 1270000, "pct": -1.9}, {"address": "2 Phoenix Terrace, Blackrock, Dublin", "sold_date": "14/03/2025", "asking": 1275000, "sold": 1300000, "pct": 2.0}, {"address": "4 Bushfield Terrace, Donnybrook, Dublin 4, Dublin", "sold_date": "05/03/2024", "asking": 1275000, "sold": 1314499, "pct": 3.1}, {"address": "11 Mountpleasant Ave Upper, Ranelagh, Dublin 6, Dublin", "sold_date": "12/07/2024", "asking": 1275000, "sold": 1425000, "pct": 11.8}, {"address": "16 Morehampton Terrace, Donnybrook, Dublin 4, Dublin", "sold_date": "17/11/2025", "asking": 1275000, "sold": 1290000, "pct": 1.2}, {"address": "13 Templemore Ave, Rathgar, Dublin 6, Dublin", "sold_date": "13/03/2026", "asking": 1250000, "sold": 1325000, "pct": 6.0}, {"address": "4 Phoenix Terrace, Rock Rd, Blackrock, Dublin", "sold_date": "10/07/2024", "asking": 1250000, "sold": 1250000, "pct": 0.0}, {"address": "305 Clontarf Rd, Dublin 3, Dublin", "sold_date": "23/08/2024", "asking": 1250000, "sold": 1180000, "pct": -5.6}, {"address": "4 Florence Terrace, Leeson Park Ave, Dublin 6, Dublin", "sold_date": "18/12/2024", "asking": 1250000, "sold": 1500000, "pct": 20.0}, {"address": "19 Eaton Sq, Terenure, Dublin 6w, Dublin", "sold_date": "26/06/2026", "asking": 1250000, "sold": 1430000, "pct": 14.4}, {"address": "111 Leinster Rd, Rathmines, Dublin 6, Dublin", "sold_date": "19/05/2026", "asking": 1250000, "sold": 1372500, "pct": 9.8}, {"address": "12 Lennox Street, Portobello, Dublin 8, Dublin", "sold_date": "30/10/2024", "asking": 1250000, "sold": 1250000, "pct": 0.0}, {"address": "88 St Albans Park, Sandymount, Dublin 4, Dublin", "sold_date": "16/05/2025", "asking": 1250000, "sold": 1285000, "pct": 2.8}, {"address": "85 Leinster Rd, Rathmines, Dublin 6, Dublin", "sold_date": "09/10/2025", "asking": 1250000, "sold": 1430000, "pct": 14.4}, {"address": "39 Chelmsford Rd, Ranelagh, Dublin 6, Dublin", "sold_date": "16/10/2024", "asking": 1250000, "sold": 1250000, "pct": 0.0}, {"address": "2 Grantham St, Dublin 8, Dublin", "sold_date": "31/01/2024", "asking": 1250000, "sold": 1535000, "pct": 22.8}, {"address": "13 Moyne Road, Ranelagh, Dublin 6, Dublin", "sold_date": "22/11/2024", "asking": 1250000, "sold": 1230000, "pct": -1.6}, {"address": "4 Leinster Road West, Rathmines, Dublin 6, Dublin", "sold_date": "12/02/2026", "asking": 1250000, "sold": 1650000, "pct": 32.0}, {"address": "16 Rathmines Park, Rathmines, Dublin 6, Dublin", "sold_date": "08/07/2025", "asking": 1250000, "sold": 1200000, "pct": -4.0}, {"address": "105 St Lawrence Road, Clontarf, Dublin 3, Dublin", "sold_date": "04/09/2025", "asking": 1250000, "sold": 1260000, "pct": 0.8}, {"address": "14 Mornington Road, Ranelagh, Dublin 6, Dublin", "sold_date": "01/03/2024", "asking": 1250000, "sold": 1270000, "pct": 1.6}, {"address": "3 Windsor Terrace, Dun Laoghaire, Dublin", "sold_date": "08/12/2025", "asking": 1250000, "sold": 1000000, "pct": -20.0}, {"address": "34 Seafort Ave, Sandymount, Dublin 4, Dublin", "sold_date": "19/12/2025", "asking": 1235000, "sold": 1400000, "pct": 13.4}, {"address": "8 Mountpleasant Avenue Upper, Dublin 6, Dublin", "sold_date": "21/07/2025", "asking": 1225000, "sold": 1160000, "pct": -5.3}, {"address": "33 St Lawrence Rd, Clontarf, Dublin 3, Dublin", "sold_date": "16/06/2025", "asking": 1200000, "sold": 1270000, "pct": 5.8}, {"address": "10 Anna Villa, Ranelagh, Dublin 6, Dublin", "sold_date": "21/07/2026", "asking": 1200000, "sold": 1254800, "pct": 4.6}, {"address": "20 Moyne Road, Ranelagh, Dublin 6, Dublin", "sold_date": "04/03/2024", "asking": 1200000, "sold": 1320000, "pct": 10.0}, {"address": "3 Chelmsford Ave, Ranelagh, Dublin 6, Dublin", "sold_date": "05/03/2026", "asking": 1200000, "sold": 1260000, "pct": 5.0}, {"address": "3 Maretimo Terrace, Newtown Ave, Blackrock, Dublin", "sold_date": "16/07/2026", "asking": 1200000, "sold": 1410000, "pct": 17.5}, {"address": "11 Mountpleasant Ave Lower, Ranelagh, Dublin 6, Dublin", "sold_date": "17/05/2024", "asking": 1200000, "sold": 1270000, "pct": 5.8}, {"address": "43 Tritonville Road, Sandymount, Dublin 4, Dublin", "sold_date": "09/09/2025", "asking": 1195000, "sold": 1300000, "pct": 8.8}, {"address": "50 Mount Pleasant Ave Upper, Rathmines, Dublin 6, Dublin", "sold_date": "19/09/2024", "asking": 1195000, "sold": 1205000, "pct": 0.8}, {"address": "2 Windsor Terrace, Portbello, Dublin 8, Dublin", "sold_date": "24/03/2025", "asking": 1195000, "sold": 1200000, "pct": 0.4}, {"address": "47 Templemore Ave, Rathgar, Dublin 6, Dublin", "sold_date": "15/10/2025", "asking": 1175000, "sold": 1200000, "pct": 2.1}, {"address": "64 Frankfort Ave, Rathgar, Dublin 6, Dublin", "sold_date": "12/06/2026", "asking": 1175000, "sold": 1150000, "pct": -2.1}, {"address": "3 Crofton Terrace, Crofton Road, Dun Laoghaire, Dublin", "sold_date": "16/09/2025", "asking": 1175000, "sold": 1185000, "pct": 0.9}, {"address": "37 Tritonville Rd, Sandymount, Dublin 4, Dublin", "sold_date": "09/08/2024", "asking": 1150000, "sold": 1260000, "pct": 9.6}, {"address": "7 Monkstown Road, Monkstown, Co Dublin, Dublin", "sold_date": "06/07/2026", "asking": 1150000, "sold": 1295000, "pct": 12.6}, {"address": "27 Londonbridge Road, Sandymount, Dublin 4, Dublin", "sold_date": "16/04/2025", "asking": 1150000, "sold": 1365000, "pct": 18.7}, {"address": "222 Clontarf Road, Clontarf, Dublin 2, Dublin", "sold_date": "24/03/2026", "asking": 1125000, "sold": 1125000, "pct": 0.0}, {"address": "25 Bath Ave, Beggars Bush, Sandymount Dublin 4, Dublin 4, Dublin", "sold_date": "08/07/2025", "asking": 1100000, "sold": 1110000, "pct": 0.9}, {"address": "4 Ashfield Avenue, Ranelagh, Dublin 6, Dublin", "sold_date": "30/05/2025", "asking": 1100000, "sold": 1225000, "pct": 11.4}, {"address": "89 Lower Beechmount Ave, Ranelagh, Dublin 6, Dublin", "sold_date": "30/01/2024", "asking": 1100000, "sold": 1050000, "pct": -4.5}, {"address": "3 Heytesbury Court, Pembroke Lane, Ballsbridge Dublin 4, Dublin 4, Dublin", "sold_date": "22/08/2024", "asking": 1100000, "sold": 1030000, "pct": -6.4}, {"address": "16 Gilford Dr, Sandymount, Dublin 4, Dublin", "sold_date": "08/03/2024", "asking": 1100000, "sold": 1060000, "pct": -3.6}, {"address": "30 Victoria Ave, Donnybrook, Dublin 4, Dublin", "sold_date": "18/02/2026", "asking": 1100000, "sold": 1100000, "pct": 0.0}, {"address": "26 Ardee Rd, Rathmines, Dublin 6, Dublin", "sold_date": "31/07/2024", "asking": 1100000, "sold": 1115000, "pct": 1.4}, {"address": "3 Moyne Rd, Ranelagh, Dublin 6, Dublin", "sold_date": "25/07/2025", "asking": 1100000, "sold": 1200000, "pct": 9.1}, {"address": "73 Lower Beechwood Ave, Ranelagh, Dublin 6, Dublin", "sold_date": "08/04/2026", "asking": 1100000, "sold": 1200000, "pct": 9.1}, {"address": "23 Havelock Sq, Bath Ave, Sandymount Dublin 4, Dublin 4, Dublin", "sold_date": "19/03/2025", "asking": 1050000, "sold": 1180000, "pct": 12.4}, {"address": "57 Moyne Road, Ranelagh, Dublin 6, Dublin", "sold_date": "30/03/2026", "asking": 1000000, "sold": 1200000, "pct": 20.0}, {"address": "6 Moyne Road, Ranelagh, Dublin 6, Dublin", "sold_date": "19/12/2025", "asking": 1000000, "sold": 1195000, "pct": 19.5}, {"address": "30 Merrion Strand, Strand Rd, Sandymount Dublin 4, Dublin 4, Dublin", "sold_date": "27/08/2025", "asking": 1000000, "sold": 1200000, "pct": 20.0}, {"address": "10 Auburn Ave, Donnybrook, Dublin 4, Dublin", "sold_date": "05/07/2024", "asking": 995000, "sold": 1025000, "pct": 3.0}, {"address": "5 St Peters Terrace, Sandycove, Dublin", "sold_date": "19/07/2024", "asking": 995000, "sold": 950000, "pct": -4.5}, {"address": "588 South Circular Rd, Kilmainham, Dublin 8, Dublin", "sold_date": "14/05/2026", "asking": 995000, "sold": 1100000, "pct": 10.6}, {"address": "10 Fortfield Ave, Terenure, Dublin 6w, Dublin", "sold_date": "07/04/2025", "asking": 995000, "sold": 1055000, "pct": 6.0}, {"address": "35 Eden Rd Upper, Glenageary, Co Dublin, Dublin", "sold_date": "29/10/2024", "asking": 995000, "sold": 1035000, "pct": 4.0}, {"address": "5 Belmont Avenue, Donnybrook, Dublin 4, Dublin", "sold_date": "13/02/2026", "asking": 995000, "sold": 1035000, "pct": 4.0}, {"address": "Apt 1, 129 Anglesea Road, Donnybrook, Dublin", "sold_date": "04/06/2025", "asking": 990000, "sold": 1190000, "pct": 20.2}, {"address": "90 St Lawrence Road, Clontarf, Dublin 3, Dublin", "sold_date": "27/09/2024", "asking": 985000, "sold": 960000, "pct": -2.5}, {"address": "28 Curzon St, Dublin 8, Dublin", "sold_date": "27/02/2026", "asking": 975000, "sold": 1200000, "pct": 23.1}, {"address": "13 Brickfield Way, Honeypark, Dun Laoghaire, Dublin", "sold_date": "08/04/2024", "asking": 975000, "sold": 985000, "pct": 1.0}, {"address": "15 Ashfield Rd, Ranelagh, Dublin 6, Dublin", "sold_date": "28/02/2025", "asking": 975000, "sold": 1063000, "pct": 9.0}, {"address": "590 South Circular Rd, Kilmainham, Dublin 8, Dublin", "sold_date": "15/07/2025", "asking": 975000, "sold": 1250000, "pct": 28.2}, {"address": "62 Frankfort Ave, Dublin 6, Dublin", "sold_date": "14/03/2025", "asking": 975000, "sold": 1000000, "pct": 2.6}, {"address": "3 Victoria Avenue, Donnybrook, Dublin 4, Dublin", "sold_date": "24/06/2024", "asking": 975000, "sold": 1220000, "pct": 25.1}, {"address": "39 Bothar Na Maighne, Raghnallach, Baile Atha Cliath 6, Dublin 6, Dublin", "sold_date": "02/05/2024", "asking": 975000, "sold": 1000000, "pct": 2.6}, {"address": "48 Clarinda Park East, Dun Laoghaire, Co Dublin, Dublin", "sold_date": "18/12/2024", "asking": 975000, "sold": 1015000, "pct": 4.1}, {"address": "71 Manor St, Dublin 7, Dublin", "sold_date": "25/05/2026", "asking": 965000, "sold": 940000, "pct": -2.6}, {"address": "10 Charleville Road, Phibsboro, Dublin 7, Dublin", "sold_date": "06/02/2025", "asking": 950000, "sold": 1080000, "pct": 13.7}, {"address": "14 Vernon Ave, Clontarf, Dublin 3, Dublin", "sold_date": "15/12/2025", "asking": 950000, "sold": 950000, "pct": 0.0}, {"address": "7 Bessborough Parade, Dublin 6, Dublin", "sold_date": "20/02/2025", "asking": 950000, "sold": 1200000, "pct": 26.3}, {"address": "29 Chelmsford Avenue, Ranelagh, Dublin 6, Dublin", "sold_date": "09/10/2024", "asking": 950000, "sold": 1100000, "pct": 15.8}, {"address": "20 Victoria Avenue, Donnybrook, Dublin 4, Dublin", "sold_date": "27/03/2024", "asking": 950000, "sold": 1050000, "pct": 10.5}, {"address": "35 Haddington Rd, Dublin 4, Dublin", "sold_date": "10/10/2024", "asking": 950000, "sold": 902000, "pct": -5.1}, {"address": "8 Kenilworth Park, Harolds Cross, Dublin 6w, Dublin", "sold_date": "16/12/2025", "asking": 950000, "sold": 1005000, "pct": 5.8}, {"address": "14 Summerville Park, Rathmines, Dublin 6, Dublin", "sold_date": "20/03/2025", "asking": 950000, "sold": 1110000, "pct": 16.8}, {"address": "29 Pearse Sq, Pearse St, Dublin 2, Dublin", "sold_date": "23/07/2024", "asking": 950000, "sold": 920000, "pct": -3.2}, {"address": "219 Llandaff Terrace, Merrion Road, Dublin 4, Dublin", "sold_date": "02/01/2025", "asking": 950000, "sold": 1050000, "pct": 10.5}, {"address": "95 Merrion Park, Blackrock, Co. Dublin, Dublin", "sold_date": "05/09/2025", "asking": 950000, "sold": 1120000, "pct": 17.9}, {"address": "2 Winton Ave, Rathgar, Dublin 6, Dublin", "sold_date": "20/05/2025", "asking": 950000, "sold": 1005000, "pct": 5.8}, {"address": "50 Tritonville Rd, Sandymount, Dublin 4, Dublin", "sold_date": "05/02/2024", "asking": 950000, "sold": 980000, "pct": 3.2}, {"address": "4 Havelock Terrace, Sandymount, Dublin 4, Dublin", "sold_date": "01/02/2024", "asking": 945000, "sold": 950000, "pct": 0.5}, {"address": "26 Cherryfield Ave Lower, Ranelagh, Dublin 6, Dublin", "sold_date": "27/09/2024", "asking": 945000, "sold": 1050000, "pct": 11.1}, {"address": "165 Griffith Ave, Drumcondra, Dublin 9, Dublin", "sold_date": "23/06/2025", "asking": 945000, "sold": 945000, "pct": 0.0}, {"address": "81 Hollybrook Rd, Clontarf, Dublin 3, Dublin", "sold_date": "20/08/2025", "asking": 925000, "sold": 950000, "pct": 2.7}, {"address": "39 Kenilworth Park, Harolds Cross, Dublin 6w, Dublin", "sold_date": "27/03/2025", "asking": 925000, "sold": 1112000, "pct": 20.2}, {"address": "2 Coulson Ave, Rathgar, Dublin 6, Dublin", "sold_date": "23/07/2025", "asking": 925000, "sold": 1000000, "pct": 8.1}, {"address": "10 Casimir Rd, Harolds Cross, Dublin 6w, Dublin", "sold_date": "21/06/2024", "asking": 925000, "sold": 990000, "pct": 7.0}, {"address": "38 Killeen Rd, Ranelagh, Dublin 6, Dublin", "sold_date": "17/07/2025", "asking": 925000, "sold": 1110000, "pct": 20.0}, {"address": "43 Mount Merrion Ave, Blackrock, Dublin", "sold_date": "10/02/2025", "asking": 925000, "sold": 865000, "pct": -6.5}, {"address": "43 Shrewsbury Park, Ballsbridge, Dublin, Dublin 4", "sold_date": "25/04/2025", "asking": 925000, "sold": 1110000, "pct": 20.0}, {"address": "10 Henley Park, Churchtown, Dublin 14, Dublin", "sold_date": "15/01/2026", "asking": 920000, "sold": 940000, "pct": 2.2}, {"address": "10 Upper Hollybank Ave, Ranelagh, Dublin, Dublin 6", "sold_date": "24/05/2024", "asking": 915000, "sold": 910000, "pct": -0.5}, {"address": "12 Florence St, Dublin 8, Dublin", "sold_date": "11/03/2025", "asking": 915000, "sold": 870000, "pct": -4.9}, {"address": "20 Wolseley St, South Circular Rd, Dublin 8, Dublin", "sold_date": "27/05/2025", "asking": 915000, "sold": 1101402, "pct": 20.4}, {"address": "21 Kingsland Park Avenue, Portobello, Dublin 8, Dublin", "sold_date": "28/11/2025", "asking": 905000, "sold": 1000000, "pct": 10.5}, {"address": "89 Ashfield Road, Ranelagh, Dublin 6, Dublin", "sold_date": "08/10/2025", "asking": 900000, "sold": 1009000, "pct": 12.1}, {"address": "29 Leahys Terrace, Sandymount, Dublin 4, Dublin", "sold_date": "25/04/2025", "asking": 900000, "sold": 850000, "pct": -5.6}];
+
+const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+const ink = isDark ? '#ffffff' : '#0b0b0b';
+const inkSecondary = isDark ? '#c3c2b7' : '#52514e';
+const inkMuted = '#898781';
+const gridline = isDark ? '#2c2c2a' : '#e1e0d9';
+const surface = isDark ? '#1a1a19' : '#fcfcfb';
+const seriesBlue = isDark ? '#3987e5' : '#2a78d6';
+const seriesOrange = isDark ? '#d95926' : '#eb6834';
+const divergePos = seriesBlue;
+const divergeNeg = isDark ? '#e66767' : '#e34948';
+
+const baseLayout = {
+  paper_bgcolor: surface,
+  plot_bgcolor: surface,
+  font: { family: 'system-ui, -apple-system, "Segoe UI", sans-serif', color: ink, size: 12 },
+  margin: { t: 10, r: 20, b: 40, l: 60 },
+  xaxis: { gridcolor: gridline, zerolinecolor: gridline, color: inkSecondary },
+  yaxis: { gridcolor: gridline, zerolinecolor: gridline, color: inkSecondary },
+};
+const config = { displayModeBar: false, responsive: true };
+
+// ---------- MAP ----------
+const exactRows = rows.filter(r => r.location_precision === 'exact');
+const approxRows = rows.filter(r => r.location_precision !== 'exact');
+
+function hoverText(r) {
+  return `<b>${r.address}</b><br>` +
+         `Sold: €${r.sold_price_eur.toLocaleString()}<br>` +
+         `Asking: €${(r.asking_price_eur||0).toLocaleString()}<br>` +
+         `${r.beds||'?'} bed / ${r.baths||'?'} bath` +
+         (r.location_precision !== 'exact' ? '<br><i>location approximate</i>' : '');
+}
+
+const mapTraceExact = {
+  type: 'scattermapbox',
+  lat: exactRows.map(r => r.lat),
+  lon: exactRows.map(r => r.lon),
+  mode: 'markers',
+  marker: {
+    size: 11,
+    color: exactRows.map(r => r.sold_price_eur),
+    colorscale: [[0,'#cde2fb'],[0.25,'#86b6ef'],[0.5,'#3987e5'],[0.75,'#1c5cab'],[1,'#0d366b']],
+    cmin: Math.min(...rows.map(r=>r.sold_price_eur)),
+    cmax: Math.max(...rows.map(r=>r.sold_price_eur)),
+    opacity: 0.9,
+    colorbar: { title: 'Sold €', tickformat: ',.0f', thickness: 14, len: 0.7 }
+  },
+  text: exactRows.map(hoverText),
+  hoverinfo: 'text',
+  name: 'Exact address'
+};
+const mapTraceApprox = {
+  type: 'scattermapbox',
+  lat: approxRows.map(r => r.lat),
+  lon: approxRows.map(r => r.lon),
+  mode: 'markers',
+  marker: {
+    size: 9,
+    color: approxRows.map(r => r.sold_price_eur),
+    colorscale: [[0,'#cde2fb'],[0.25,'#86b6ef'],[0.5,'#3987e5'],[0.75,'#1c5cab'],[1,'#0d366b']],
+    cmin: Math.min(...rows.map(r=>r.sold_price_eur)),
+    cmax: Math.max(...rows.map(r=>r.sold_price_eur)),
+    opacity: 0.45,
+    showscale: false
+  },
+  text: approxRows.map(hoverText),
+  hoverinfo: 'text',
+  name: 'Area-level approximate'
+};
+
+Plotly.newPlot('map', [mapTraceExact, mapTraceApprox], {
+  ...baseLayout,
+  margin: { t: 0, r: 0, b: 0, l: 0 },
+  mapbox: {
+    style: 'open-street-map',
+    center: { lat: 53.325, lon: -6.235 },
+    zoom: 11.5
+  },
+  showlegend: false
+}, config);
+
+// ---------- SOLD VS ASKING SCATTER ----------
+const maxAsk = Math.max(...premium.map(p => p.asking), ...premium.map(p=>p.sold));
+Plotly.newPlot('scatter-asking', [
+  {
+    x: [0, maxAsk], y: [0, maxAsk], mode: 'lines',
+    line: { color: inkMuted, width: 1.5, dash: 'dot' },
+    hoverinfo: 'skip', showlegend: false
+  },
+  {
+    x: premium.map(p => p.asking),
+    y: premium.map(p => p.sold),
+    mode: 'markers',
+    marker: {
+      size: 8,
+      color: premium.map(p => p.pct),
+      colorscale: [[0, divergeNeg],[0.5, isDark? '#383835':'#f0efec'],[1, divergePos]],
+      cmin: -30, cmax: 30,
+      line: { width: 1, color: surface }
+    },
+    text: premium.map(p => `<b>${p.address}</b><br>Asking: €${p.asking.toLocaleString()}<br>Sold: €${p.sold.toLocaleString()}<br>${p.pct>0?'+':''}${p.pct}% vs asking`),
+    hoverinfo: 'text',
+    showlegend: false
+  }
+], {
+  ...baseLayout,
+  xaxis: { ...baseLayout.xaxis, title: 'Asking price (€)', tickformat: ',.0f' },
+  yaxis: { ...baseLayout.yaxis, title: 'Sold price (€)', tickformat: ',.0f' },
+}, config);
+
+// ---------- PRICE PER M2 BY AREA ----------
+Plotly.newPlot('bar-area', [{
+  type: 'bar',
+  orientation: 'h',
+  y: areaStats.map(a => a.area).reverse(),
+  x: areaStats.map(a => a.median_price_per_m2).reverse(),
+  marker: { color: seriesBlue },
+  text: areaStats.map(a => '€' + a.median_price_per_m2.toLocaleString()).reverse(),
+  textposition: 'outside',
+  textfont: { color: inkSecondary, size: 11 },
+  hovertext: areaStats.map(a => `${a.area}<br>€${a.median_price_per_m2.toLocaleString()}/m² (n=${a.n})`).reverse(),
+  hoverinfo: 'text'
+}], {
+  ...baseLayout,
+  margin: { t: 10, r: 70, b: 40, l: 110 },
+  xaxis: { ...baseLayout.xaxis, title: '€ per m² (median)', tickformat: ',.0f',
+            range: [0, Math.max(...areaStats.map(a => a.median_price_per_m2)) * 1.18] },
+  yaxis: { ...baseLayout.yaxis, automargin: true },
+}, config);
+
+// ---------- TIME TREND ----------
+const sortedByDate = [...rows].sort((a,b) => a.sold_date_iso.localeCompare(b.sold_date_iso));
+function rollingMedian(arr, window) {
+  const out = [];
+  for (let i = 0; i < arr.length; i++) {
+    const start = Math.max(0, i - window + 1);
+    const slice = arr.slice(start, i+1).slice().sort((a,b)=>a-b);
+    const n = slice.length;
+    out.push(n % 2 === 1 ? slice[(n-1)/2] : (slice[n/2-1]+slice[n/2])/2);
+  }
+  return out;
+}
+const rollMed = rollingMedian(sortedByDate.map(r => r.sold_price_eur), 10);
+
+Plotly.newPlot('time-trend', [
+  {
+    x: sortedByDate.map(r => r.sold_date_iso),
+    y: sortedByDate.map(r => r.sold_price_eur),
+    mode: 'markers',
+    marker: { size: 6, color: seriesBlue, opacity: 0.55 },
+    text: sortedByDate.map(r => `<b>${r.address}</b><br>${r.sold_date}<br>€${r.sold_price_eur.toLocaleString()}`),
+    hoverinfo: 'text',
+    name: 'Sale'
+  },
+  {
+    x: sortedByDate.map(r => r.sold_date_iso),
+    y: rollMed,
+    mode: 'lines',
+    line: { color: seriesOrange, width: 2 },
+    hoverinfo: 'skip',
+    name: '10-sale rolling median'
+  }
+], {
+  ...baseLayout,
+  xaxis: { ...baseLayout.xaxis, title: 'Sold date' },
+  yaxis: { ...baseLayout.yaxis, title: 'Sold price (€)', tickformat: ',.0f' },
+  showlegend: true,
+  legend: { orientation: 'h', y: 1.12, font: { color: inkSecondary, size: 11 } }
+}, config);
+
+// ---------- MEDIAN PRICE BY BEDS ----------
+Plotly.newPlot('bar-beds', [{
+  type: 'bar',
+  x: bedStats.map(b => b.beds + ' bed'),
+  y: bedStats.map(b => b.median_price),
+  marker: { color: seriesBlue },
+  text: bedStats.map(b => '€' + b.median_price.toLocaleString()),
+  textposition: 'outside',
+  textfont: { color: inkSecondary, size: 11 },
+  hovertext: bedStats.map(b => `${b.beds} bed · n=${b.n}<br>median €${b.median_price.toLocaleString()}`),
+  hoverinfo: 'text',
+  width: 0.5
+}], {
+  ...baseLayout,
+  xaxis: { ...baseLayout.xaxis, title: '' },
+  yaxis: { ...baseLayout.yaxis, title: 'Median sold price (€)', tickformat: ',.0f',
+            range: [0, Math.max(...bedStats.map(b => b.median_price)) * 1.15] },
+}, config);
+</script>
+</body>
+</html>
